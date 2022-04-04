@@ -1,26 +1,45 @@
+import * as uuid from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
+import { EmailService } from 'src/email/email.service';
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private emailService: EmailService) {}
+  async createUser(name: string, email: string, password: string) {
+    await this.checkUserExists(email);
+
+    const signupVerifyToken = uuid.v1();
+
+    await this.saveUser(name, email, password, signupVerifyToken);
+    await this.sendMemberJoinEmail(email, signupVerifyToken);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  private checkUserExists(email: string) {
+    return false; // TODO: DB 연동 후 구현
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  private saveUser(
+    name: string,
+    email: string,
+    password: string,
+    signupVerifyToken: string,
+  ) {
+    return; // TODO: DB 연동 후 구현
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
+    await this.emailService.sendMemberJoinVerification(
+      email,
+      signupVerifyToken,
+    );
   }
+  async verifyEmail(signupVerifyToken: string) {
+    console.log(signupVerifyToken);
+    return signupVerifyToken;
+  }
+//   async getUserInfo(userId: string): Promise<UserInfo> {
+//     // 1. userId를 가진 유저가 존재하는지 DB에서 확인하고 없다면 에러 처리
+//     // 2. 조회된 데이터를 UserInfo 타입으로 응답
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+//     throw new Error('Method not implemented.');
+//   }
 }

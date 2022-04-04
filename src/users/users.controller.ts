@@ -1,44 +1,37 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserLoginDto } from './dto/user-login.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { UsersService } from './users.service';
+// import { UserInfo } from './UserInfo';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
+  constructor(private usersService: UsersService) {}
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    const { name, email } = createUserDto;
-
-    return `유저를 생성했습니다. 이름: ${name}, 이메일: ${email}`;
+  async createUser(@Body() dto: CreateUserDto): Promise<void> {
+    const { name, email, password } = dto;
+    await this.usersService.createUser(name, email, password);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Post('/email-verify')
+  async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
+    const { signupVerifyToken } = dto;
+
+    return await this.usersService.verifyEmail(signupVerifyToken);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Post('/login')
+  async login(email: string, password: string): Promise<string> {
+    // TODO
+    // 1. email, password를 가진 유저가 존재하는지 DB에서 확인하고 없다면 에러 처리
+    // 2. JWT를 발급
+
+    throw new Error('Method not implemented.');
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+//   @Get('/:id')
+//   async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
+//     return await this.usersService.getUserInfo(userId);
+//   }
 }
